@@ -16,7 +16,14 @@ function App() {
           <img src={viteLogo} className="vite" alt="Vite logo" />
         </div>
         <div>
-          <h1>Get started</h1>
+          <h1 className="leading-snug !text-4xl !my-4">
+            <span className="block font-semibold tracking-tight bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+              Hi Summer!
+            </span>
+            <span className="block mt-1 text-2xl font-light italic tracking-wide text-gray-500 dark:text-gray-400">
+              Lets get started
+            </span>
+          </h1>
           <p>
             Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
           </p>
