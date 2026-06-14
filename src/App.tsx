@@ -1,10 +1,40 @@
+import { useState } from 'react'
+import { generateClient } from 'aws-amplify/data'
+import type { Schema } from '../amplify/data/resource'
+
 const BG = '#F8F7F4'
 const TEXT = '#2E3D49'
 const TEAL = '#0D6B5E'
 
+const client = generateClient<Schema>()
+
 function App() {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   const scrollToWaitlist = () => {
     document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    try {
+      const { errors } = await client.models.WaitlistEntry.create({ email })
+      if (errors && errors.length > 0) {
+        setError('Something went wrong. Please try again.')
+      } else {
+        setSubmitted(true)
+        setEmail('')
+      }
+    } catch {
+      setError('Unable to connect. Please check your connection and try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -74,25 +104,40 @@ function App() {
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Be first to restore your focus
           </h2>
-          <form
-            className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <input
-              type="email"
-              required
-              placeholder="you@example.com"
-              className="w-full flex-1 rounded-full border border-gray-300 bg-white px-5 py-3 text-base outline-none focus:border-transparent focus:ring-2"
-              style={{ color: TEXT }}
-            />
-            <button
-              type="submit"
-              className="rounded-full px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:opacity-90"
-              style={{ backgroundColor: TEAL }}
-            >
-              Notify Me
-            </button>
-          </form>
+          {submitted ? (
+            <p className="mt-8 text-lg font-medium" style={{ color: TEAL }}>
+              You're on the list! We'll be in touch.
+            </p>
+          ) : (
+            <>
+              <form
+                className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row"
+                onSubmit={handleSubmit}
+              >
+                <input
+                  type="email"
+                  required
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  className="w-full flex-1 rounded-full border border-gray-300 bg-white px-5 py-3 text-base outline-none focus:border-transparent focus:ring-2 disabled:opacity-60"
+                  style={{ color: TEXT }}
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="rounded-full px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
+                  style={{ backgroundColor: TEAL }}
+                >
+                  {loading ? 'Saving…' : 'Notify Me'}
+                </button>
+              </form>
+              {error && (
+                <p className="mt-3 text-sm text-red-600">{error}</p>
+              )}
+            </>
+          )}
           <p className="mt-4 text-sm opacity-70">
             iPhone + Apple Watch required. iOS only at launch.
           </p>

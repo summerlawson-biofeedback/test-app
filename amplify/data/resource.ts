@@ -12,6 +12,12 @@ const schema = a.schema({
       content: a.string(),
     })
     .authorization((allow) => [allow.guest()]),
+
+  WaitlistEntry: a
+    .model({
+      email: a.string().required(),
+    })
+    .authorization((allow) => [allow.guest().to(['create'])]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
