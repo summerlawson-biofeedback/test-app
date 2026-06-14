@@ -24,6 +24,10 @@ dist-ssr
 *.sw?
 
 
+# AWS CLI installer artifacts
+aws/
+awscliv2.zip
+
 # amplify
 node_modules
 .amplify
