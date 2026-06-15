@@ -23,6 +23,7 @@ function App() {
     setLoading(true)
     setError(null)
     try {
+      // @ts-expect-error: Amplify data-schema v1.25 incorrectly types 'email' as string[] — runtime is correct
       const { errors } = await client.models.WaitlistEntry.create({ email })
       if (errors && errors.length > 0) {
         setError('Something went wrong. Please try again.')
