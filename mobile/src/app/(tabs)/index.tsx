@@ -1,3 +1,4 @@
+import { BodySignalsCard } from '@/components/body-signals-card';
 import { Card } from '@/components/card';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
@@ -11,6 +12,8 @@ export default function TodayScreen() {
           Your daily forecast will appear here once PulsePause knows your rhythms.
         </ThemedText>
       </Card>
+
+      <BodySignalsCard />
 
       <Card eyebrow="Your baseline" title="Day 0 of 14">
         <ThemedText themeColor="textSecondary">
