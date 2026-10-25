@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 type ScreenProps = {
   title: string;
@@ -13,11 +15,22 @@ type ScreenProps = {
   /** Overrides for when the title sits on a coloured background. */
   titleColor?: string;
   subtitleColor?: string;
+  /** Pinned below the scrolling content, above the tab bar. */
+  footer?: ReactNode;
   children: ReactNode;
 };
 
 /** Scrollable page with a large title; safe-area and tab-bar insets are handled automatically. */
-export function Screen({ title, subtitle, background, titleColor, subtitleColor, children }: ScreenProps) {
+export function Screen({
+  title,
+  subtitle,
+  background,
+  titleColor,
+  subtitleColor,
+  footer,
+  children,
+}: ScreenProps) {
+  const theme = useTheme();
   return (
     <ThemedView style={styles.fill}>
       {background}
@@ -38,6 +51,13 @@ export function Screen({ title, subtitle, background, titleColor, subtitleColor,
           <View style={styles.body}>{children}</View>
         </View>
       </ScrollView>
+      {footer ? (
+        <SafeAreaView
+          edges={['bottom']}
+          style={[styles.footer, { backgroundColor: theme.background, borderColor: theme.border }]}>
+          {footer}
+        </SafeAreaView>
+      ) : null}
     </ThemedView>
   );
 }
@@ -60,5 +80,9 @@ const styles = StyleSheet.create({
   body: {
     marginTop: Spacing.three,
     gap: Spacing.three,
+  },
+  footer: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
   },
 });

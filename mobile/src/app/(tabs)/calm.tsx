@@ -1,40 +1,79 @@
+import { router } from 'expo-router';
+import { StyleSheet, Switch, View } from 'react-native';
+
+import { useCalm } from '@/calm/calm-context';
+import { totalSeconds, VISIBLE_STRATEGIES } from '@/calm/strategies';
+import { BreathingShape } from '@/components/breathing-shape';
 import { Card } from '@/components/card';
+import { CrisisLink } from '@/components/crisis-link';
 import { PillButton } from '@/components/pill-button';
+import { RecheckCard } from '@/components/recheck-card';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
-const STRATEGIES = [
-  {
-    name: 'Physiological sigh',
-    duration: '1 min',
-    description: 'Two inhales through the nose, one long exhale through the mouth.',
-  },
-  {
-    name: 'Extended exhale',
-    duration: '3 min',
-    description: 'Breathe out for longer than you breathe in to slow things down.',
-  },
-  {
-    name: 'Grounding',
-    duration: '2 min',
-    description: 'Notice five things you can see, four you can touch, three you can hear.',
-  },
-];
-
-// Placeholder: the button and strategies don't start guided sessions yet.
 export default function CalmScreen() {
+  const theme = useTheme();
+  const { haptics, setHaptics } = useCalm();
+
   return (
-    <Screen title="Calm" subtitle="Short, guided ways to come back to steady.">
-      <PillButton label="I'm activated" variant="primary" size="large" />
-      <ThemedText type="small" themeColor="textSecondary">
+    <Screen title="Calm" subtitle="Short, guided ways back to steady." footer={<CrisisLink />}>
+      <BreathingShape phase="idle" size={200} />
+
+      <PillButton
+        label="I'm activated"
+        variant="primary"
+        size="large"
+        onPress={() => router.push('/activated')}
+      />
+      <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
         Works anytime, no wearable needed.
       </ThemedText>
 
-      {STRATEGIES.map((strategy) => (
-        <Card key={strategy.name} eyebrow={strategy.duration} title={strategy.name}>
-          <ThemedText themeColor="textSecondary">{strategy.description}</ThemedText>
+      <RecheckCard />
+
+      {VISIBLE_STRATEGIES.map((strategy) => (
+        <Card key={strategy.id} eyebrow={`${totalSeconds(strategy)} seconds`} title={strategy.name}>
+          <ThemedText themeColor="textSecondary">{strategy.why}</ThemedText>
+          <PillButton
+            label="Start"
+            onPress={() => router.push({ pathname: '/session/[id]', params: { id: strategy.id } })}
+          />
         </Card>
       ))}
+
+      <View style={[styles.setting, { borderColor: theme.border }]}>
+        <View style={styles.settingText}>
+          <ThemedText type="smallBold">Haptic pacing</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            A gentle tap as each breath begins.
+          </ThemedText>
+        </View>
+        <Switch
+          accessibilityLabel="Haptic pacing"
+          value={haptics}
+          onValueChange={setHaptics}
+          trackColor={{ true: theme.accent }}
+        />
+      </View>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  center: {
+    textAlign: 'center',
+  },
+  setting: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    paddingTop: Spacing.three,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  settingText: {
+    flex: 1,
+    gap: Spacing.half,
+  },
+});
