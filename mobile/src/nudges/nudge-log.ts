@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type NudgeOutcome = 'pending' | 'tapped' | 'dismissed' | 'ignored';
+/** 'answered' means a context check-in button on the notification itself. */
+export type NudgeOutcome = 'pending' | 'tapped' | 'answered' | 'dismissed' | 'ignored';
 
 export type NudgeRecord = {
   /** The notification's identifier. */
@@ -36,14 +37,14 @@ export async function logNudgeSent(id: string) {
 }
 
 /**
- * Records the first outcome, except that a tap always wins: tapping clears the
- * notification, which could otherwise be read as a dismissal a moment earlier.
+ * Records the first outcome, except that a tap or check-in answer always wins: acting on
+ * a notification clears it, which could otherwise be read as a dismissal a moment earlier.
  */
 export async function logNudgeOutcome(id: string, outcome: Exclude<NudgeOutcome, 'pending'>) {
   const records = await loadNudges();
   const record = records.find((r) => r.id === id);
-  if (!record || record.outcome === 'tapped') return;
-  if (record.outcome !== 'pending' && outcome !== 'tapped') return;
+  if (!record || record.outcome === 'tapped' || record.outcome === 'answered') return;
+  if (record.outcome !== 'pending' && outcome !== 'tapped' && outcome !== 'answered') return;
   record.outcome = outcome;
   record.outcomeAt = new Date().toISOString();
   await saveNudges(records);

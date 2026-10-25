@@ -4,6 +4,7 @@ import { STRESS_CONFIG, type StressConfig } from '@/stress/config';
 
 export type NotFlaggedReason =
   | 'quiet-hours'
+  | 'paused'
   | 'daily-limit'
   | 'cooldown'
   | 'learning'
@@ -22,6 +23,8 @@ export type DetectionInput = {
   dailyResting: number[];
   /** When earlier stress moments were flagged. */
   previousFlags: Date[];
+  /** Nudges paused until then, e.g. after "I'm moving" in a context check-in. */
+  pausedUntil?: Date | null;
 };
 
 export type DetectionResult =
@@ -51,13 +54,14 @@ export function isQuietHour(now: Date, { start, end }: StressConfig['quietHours'
  * while they are mostly still, outside quiet hours and the cooldown. When not, says why.
  */
 export function detectStressMoment(
-  { now, heartRate, steps, dailyResting, previousFlags }: DetectionInput,
+  { now, heartRate, steps, dailyResting, previousFlags, pausedUntil }: DetectionInput,
   config: StressConfig = STRESS_CONFIG
 ): DetectionResult {
   const t = now.getTime();
   const baseline = restingBaseline(dailyResting, config);
 
   if (isQuietHour(now, config.quietHours)) return { flagged: false, reason: 'quiet-hours', baseline };
+  if (pausedUntil && t < pausedUntil.getTime()) return { flagged: false, reason: 'paused', baseline };
 
   const today = previousFlags.filter((f) => f.toDateString() === now.toDateString());
   if (today.length >= config.maxPerDay) return { flagged: false, reason: 'daily-limit', baseline };

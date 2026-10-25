@@ -152,6 +152,21 @@ describe('detectStressMoment', () => {
     });
   });
 
+  describe('pause from a context check-in', () => {
+    it('stays quiet while paused', () => {
+      const pausedUntil = new Date(NOW.getTime() + 10 * MINUTE);
+      expect(detectStressMoment(input({ pausedUntil }))).toMatchObject({
+        flagged: false,
+        reason: 'paused',
+      });
+    });
+
+    it('flags again once the pause has ended', () => {
+      const pausedUntil = new Date(NOW.getTime() - MINUTE);
+      expect(detectStressMoment(input({ pausedUntil })).flagged).toBe(true);
+    });
+  });
+
   it('uses adjusted thresholds from config', () => {
     const stricter = { ...STRESS_CONFIG, aboveBaselineBpm: 40 };
     expect(detectStressMoment(input(), stricter)).toMatchObject({

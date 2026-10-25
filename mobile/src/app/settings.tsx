@@ -16,18 +16,24 @@ import {
   type NudgeFrequency,
   type NudgeSettings,
 } from '@/nudges/settings';
+import { CONTEXT_OPTIONS, contextPatterns, loadContextLog, type ContextPattern } from '@/nudges/context';
 import { STRESS_CONFIG } from '@/stress/config';
 
+// Patterns need a few answers before they mean anything.
+const MIN_FOR_PATTERNS = 3;
+const label = (id: ContextPattern['answer']) => CONTEXT_OPTIONS.find((o) => o.id === id)?.label ?? id;
 const hour = (h: number) => new Date(2000, 0, 1, h).toLocaleTimeString(undefined, { hour: 'numeric' });
 
 export default function SettingsScreen() {
   const theme = useTheme();
   const [settings, setSettings] = useState<NudgeSettings>(DEFAULT_NUDGE_SETTINGS);
   const [allowed, setAllowed] = useState<boolean | null>(null);
+  const [patterns, setPatterns] = useState<ContextPattern[]>([]);
 
   useEffect(() => {
     loadNudgeSettings().then(setSettings);
     notificationsAllowed().then(setAllowed).catch(() => setAllowed(false));
+    loadContextLog().then((log) => setPatterns(log.length >= MIN_FOR_PATTERNS ? contextPatterns(log) : []));
   }, []);
 
   const update = (next: NudgeSettings) => {
@@ -96,6 +102,17 @@ export default function SettingsScreen() {
             Never overnight, between {hour(STRESS_CONFIG.quietHours.start)} and{' '}
             {hour(STRESS_CONFIG.quietHours.end)}.
           </ThemedText>
+        </Card>
+      ) : null}
+
+      {patterns.length > 0 ? (
+        <Card eyebrow="Your patterns" title="From your check-ins">
+          {patterns.map((p) => (
+            <ThemedText key={p.answer} themeColor="textSecondary">
+              {label(p.answer)}: {p.count} {p.count === 1 ? 'time' : 'times'}, most often around{' '}
+              {hour(p.commonHour)}
+            </ThemedText>
+          ))}
         </Card>
       ) : null}
     </Screen>

@@ -24,6 +24,7 @@ const SCENARIOS: { id: MockScenario; label: string }[] = [
 
 const REASONS: Record<NotFlaggedReason, string> = {
   'quiet-hours': 'Quiet hours, so no flag.',
+  paused: 'Paused by a recent context check-in answer.',
   'daily-limit': 'Already flagged the daily maximum for this frequency.',
   cooldown: 'Within the cooldown since the last flag.',
   learning: 'Baseline still learning.',

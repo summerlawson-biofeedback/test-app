@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { HealthDataSource } from '@/health/source';
+import { loadPausedUntil } from '@/nudges/context';
 import { sendStressNudge } from '@/nudges/notify';
 import { FREQUENCIES, loadNudgeSettings } from '@/nudges/settings';
 import { STRESS_CONFIG, type StressConfig } from '@/stress/config';
@@ -51,6 +52,7 @@ export async function runStressCheck(
       steps: await source.getSteps(since(config.windowMinutes + config.recentExerciseLookbackMinutes), now),
       dailyResting: await source.getDailyRestingHeartRate(config.baselineDays, now),
       previousFlags: await loadFlags(),
+      pausedUntil: await loadPausedUntil(),
     },
     config
   );

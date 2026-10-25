@@ -1,10 +1,11 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Switch, View } from 'react-native';
 
 import { useCalm } from '@/calm/calm-context';
 import { totalSeconds, VISIBLE_STRATEGIES } from '@/calm/strategies';
 import { BreathingShape } from '@/components/breathing-shape';
 import { Card } from '@/components/card';
+import { ContextCheckIn } from '@/components/context-check-in';
 import { CrisisLink } from '@/components/crisis-link';
 import { PillButton } from '@/components/pill-button';
 import { RecheckCard } from '@/components/recheck-card';
@@ -16,9 +17,19 @@ import { useTheme } from '@/hooks/use-theme';
 export default function CalmScreen() {
   const theme = useTheme();
   const { haptics, setHaptics } = useCalm();
+  // Set when Calm was opened from a nudge.
+  const { checkin } = useLocalSearchParams<{ checkin?: string }>();
 
   return (
     <Screen title="Calm" subtitle="Short, guided ways back to steady." footer={<CrisisLink />}>
+      {checkin ? (
+        <ContextCheckIn
+          key={checkin}
+          nudgeId={checkin}
+          onDone={() => router.setParams({ checkin: undefined })}
+        />
+      ) : null}
+
       <BreathingShape phase="idle" size={200} />
 
       <PillButton

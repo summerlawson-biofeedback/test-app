@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 
+import { CONTEXT_OPTIONS, recordContext, type ContextAnswer } from '@/nudges/context';
 import { loadNudges, logNudgeOutcome, logNudgeSent } from '@/nudges/nudge-log';
 
 export const NUDGE_TEXT = "Your body's running a little hot. Want a 60-second reset?";
@@ -7,10 +8,14 @@ const CATEGORY = 'stress-nudge';
 const OPENS = '/calm';
 /** iOS reports a swipe-away with this action when the category asks for it. */
 const IOS_DISMISS_ACTION = 'com.apple.UNNotificationDismissActionIdentifier';
+const CONTEXT_ACTION = 'context:';
 /** Still sitting in Notification Center this long after sending counts as ignored. */
 const IGNORED_AFTER_MS = 2 * 60 * 60_000;
 
-/** Show nudges as a banner even while the app is open, and ask iOS to report dismissals. */
+/**
+ * Show nudges as a banner even while the app is open, ask iOS to report dismissals, and
+ * offer the context check-in as buttons on the notification (long-press to see them).
+ */
 export function setUpNudges() {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -20,7 +25,15 @@ export function setUpNudges() {
       shouldSetBadge: false,
     }),
   });
-  Notifications.setNotificationCategoryAsync(CATEGORY, [], { customDismissAction: true }).catch(() => {});
+  Notifications.setNotificationCategoryAsync(
+    CATEGORY,
+    CONTEXT_OPTIONS.map((option) => ({
+      identifier: CONTEXT_ACTION + option.id,
+      buttonTitle: option.label,
+      options: { opensAppToForeground: false },
+    })),
+    { customDismissAction: true }
+  ).catch(() => {});
 }
 
 export async function notificationsAllowed() {
@@ -60,8 +73,15 @@ export async function handleNudgeResponse(response: Notifications.NotificationRe
     await logNudgeOutcome(identifier, 'dismissed');
     return null;
   }
+  if (response.actionIdentifier.startsWith(CONTEXT_ACTION)) {
+    const answer = response.actionIdentifier.slice(CONTEXT_ACTION.length) as ContextAnswer;
+    await recordContext({ answer, suggestedMoving: false, from: 'notification', nudgeId: identifier });
+    await logNudgeOutcome(identifier, 'answered');
+    return null;
+  }
   await logNudgeOutcome(identifier, 'tapped');
-  return OPENS;
+  // Calm shows the context check-in for this nudge.
+  return `${OPENS}?checkin=${encodeURIComponent(identifier)}`;
 }
 
 /**
