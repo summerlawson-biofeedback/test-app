@@ -46,6 +46,35 @@ items below.
 - [ ] **9. Opt-in outcomes log**: anonymized, voluntary beta results (resets, ratings, nudge responses, shield choices) with a summary screen, separate from clinical care.
 - [ ] **10. Real Apple Health connection**: replace `MockHealthDataSource` with HealthKit in a development build. *(After developer approval.)*
 - [ ] **11. Stressor Shield + context check-in**: opt-in shielding of chosen apps during stress moments, plus "freeze" detection. *(Context check-in is built; the Shield waits for Family Controls approval.)*
+- [ ] **12. Medication reminder (v1, free)**: gentle reminders that keep nudging until the dose is logged in the app. Reminder and log only.
+  - Add a medication: name, optional dose, schedule (times per day, specific days, or as needed), optional note (e.g., "with food").
+  - At dose time: "Gentle reminder: time for your meds 💛". Re-reminds every 10 min for the first 30 min, then every 30 min, until logged in the app. Swiping a notification away never counts as taken.
+  - In-app actions: Taken (timestamped), Skip (optional reason: side effects, ran out, doctor said to, other), Snooze 15/30/60 min. Skip stops reminders for that dose.
+  - The dose window closes after 4 hours (adjustable); reminders stop and the dose is marked missed, without shame language. Never "You missed..."
+  - Time Sensitive notifications (opt-in) so reminders can break through Focus. Never Critical Alerts.
+  - Simple history: taken / skipped / missed per day. No streaks, no scores.
+  - Optional refill reminder: enter a pill count; a gentle heads-up when about 7 days remain.
+  - Always visible: "PulsePause is a reminder tool, not medical advice. Follow your prescriber's instructions." No dosing advice, interaction checks or recommendations anywhere.
+  - Privacy: medication names and dose logs stay on the device. No DynamoDB sync unless the person opts into backup, and then only encrypted.
+  - Future hooks (stubbed, not built): Apple Health Medications sync; insights linking on-time doses with Weather Report check-ins and sleep; an adherence summary the person can export for their prescriber.
+  - **Benchmark:** Medisafe and Apple Health Medications. Match their core features, but never copy their UI, wording or branding:
+    - Taken / Skipped / Snooze (above).
+    - As-needed (PRN) meds: no scheduled reminders; log when taken, and show when it was last taken. No minimum-gap warnings or "safe to take" hints (that would be dosing advice).
+    - Refill reminders (above).
+    - Time-zone change: when the phone's time zone changes, ask once whether to keep doses on home time or move them to local time. Never shift them silently.
+    - Apple Watch logging: Taken / Skip / Snooze from the Watch. Needs a watchOS app target, so it waits for a development build.
+  - **Our differentiators:**
+    1. Reminders repeat until the dose is logged in the app, not just one follow-up.
+    2. All core features are free. No paywall.
+    3. Later: a link between taking doses and Weather Reports and sleep.
+
+## v2 (opt-in)
+
+- [ ] **Support Person**: a trusted contact can be told when a dose is missed, only with the person's explicit consent.
+  - Off by default. Consent is asked separately for each medication, and it can be turned off at any time from Settings.
+  - The contact also agrees before receiving anything.
+  - The message is minimal by default (e.g., "a reminder in PulsePause wasn't logged"). The medication name is included only if the person chooses to share it.
+  - This is the first medication feature that has to leave the device (a message has to be sent). Explain why to the person, and send only what's needed.
 
 ## Also required by CLAUDE.md (not yet built)
 
@@ -56,4 +85,5 @@ items below.
 ## Waiting on Apple
 
 - [ ] **Apple Developer Program membership** (Individual): needed for a development build, real Apple Health data (item 10) and the Stressor Shield (item 11).
+- [ ] **Time Sensitive Notifications capability**: needed for medication reminders to break through Focus (item 12). Needs a development build, so it isn't available in Expo Go.
 - [ ] **Family Controls entitlement** (distribution): request from Apple for the app and each Screen Time extension; needed for the Stressor Shield and freeze detection (item 11).

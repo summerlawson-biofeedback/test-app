@@ -33,3 +33,6 @@ node_modules
 .amplify
 amplify_outputs*
 amplifyconfiguration*
+
+# Expo dev-server QR code (local, points at this Codespace)
+expo-qr.png
