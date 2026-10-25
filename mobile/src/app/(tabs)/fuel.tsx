@@ -13,9 +13,10 @@ export default function FuelScreen() {
       <Card eyebrow="Check in" title="Have you eaten?">
         <View style={styles.row}>
           <PillButton label="Breakfast" />
+          <PillButton label="AM snack" />
           <PillButton label="Lunch" />
+          <PillButton label="PM snack" />
           <PillButton label="Dinner" />
-          <PillButton label="Snack" />
         </View>
       </Card>
 

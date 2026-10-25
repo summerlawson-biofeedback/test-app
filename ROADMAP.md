@@ -31,7 +31,7 @@ items below.
 ## Build queue
 
 - [x] **1. Calm screen**: 60-second breathing and grounding resets with 1–5 activation ratings before and after.
-- [ ] **2. Fuel rhythm**: the Fuel tab always shows Breakfast, Morning Snack, Lunch, Afternoon Snack and Dinner, with gentle, no-numbers logging.
+- [ ] **2. Fuel rhythm**: the Fuel tab always shows Breakfast, AM snack, Lunch, PM snack and Dinner, with gentle, no-numbers logging.
   - Both snack slots are always shown and can't be removed; an optional evening snack can be added.
   - Logging stays no-numbers by default (a tap or a few words); calories remain opt-in only.
   - An unlogged slot is a soft, open slot: never red, never "missed," never a warning.
