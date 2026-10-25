@@ -1,4 +1,7 @@
+import { router } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
+import { Pressable, StyleSheet } from 'react-native';
 
 import { BodySignalsCard } from '@/components/body-signals-card';
 import { Card } from '@/components/card';
@@ -28,7 +31,19 @@ export default function TodayScreen() {
       subtitle={today}
       titleColor={sky.text}
       subtitleColor={sky.textSecondary}
-      background={<SkyBackground forecast={forecast} />}>
+      background={<SkyBackground forecast={forecast} />}
+      // Hidden developer screen: long-press the title, development builds only.
+      onTitleLongPress={__DEV__ ? () => router.push('/dev') : undefined}
+      titleAccessory={
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Settings"
+          hitSlop={8}
+          onPress={() => router.push('/settings')}
+          style={styles.gear}>
+          <SymbolView name="gearshape" tintColor={sky.text} size={24} />
+        </Pressable>
+      }>
       <ForecastHero day={day} />
       <ForecastPreview value={forecast} onChange={setForecast} />
 
@@ -45,3 +60,12 @@ export default function TodayScreen() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  gear: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

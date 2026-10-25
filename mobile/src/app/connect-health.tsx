@@ -67,7 +67,7 @@ export default function ConnectHealthScreen() {
         </ThemedText>
       </Card>
 
-      {source.kind === 'sample' ? (
+      {source.kind === 'mock' ? (
         <ThemedText type="small" themeColor="textSecondary">
           Preview build: this shows sample data. Real Apple Health readings arrive with the
           installed PulsePause app.

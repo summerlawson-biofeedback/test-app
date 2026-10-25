@@ -17,6 +17,9 @@ type ScreenProps = {
   subtitleColor?: string;
   /** Pinned below the scrolling content, above the tab bar. */
   footer?: ReactNode;
+  onTitleLongPress?: () => void;
+  /** Small control beside the title, e.g. a settings button. */
+  titleAccessory?: ReactNode;
   children: ReactNode;
 };
 
@@ -28,6 +31,8 @@ export function Screen({
   titleColor,
   subtitleColor,
   footer,
+  onTitleLongPress,
+  titleAccessory,
   children,
 }: ScreenProps) {
   const theme = useTheme();
@@ -38,9 +43,16 @@ export function Screen({
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.content}>
         <View style={styles.inner}>
-          <ThemedText type="title" accessibilityRole="header" style={titleColor ? { color: titleColor } : undefined}>
-            {title}
-          </ThemedText>
+          <View style={styles.titleRow}>
+            <ThemedText
+              type="title"
+              accessibilityRole="header"
+              onLongPress={onTitleLongPress}
+              style={[styles.title, titleColor ? { color: titleColor } : undefined]}>
+              {title}
+            </ThemedText>
+            {titleAccessory}
+          </View>
           {subtitle ? (
             <ThemedText
               themeColor="textSecondary"
@@ -76,6 +88,14 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     gap: Spacing.two,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  title: {
+    flex: 1,
   },
   body: {
     marginTop: Spacing.three,

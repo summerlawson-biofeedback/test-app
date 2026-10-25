@@ -28,7 +28,7 @@ export function BodySignalsCard() {
 
   return (
     <Card
-      eyebrow={source.kind === 'sample' ? 'Body signals · sample data' : 'Body signals'}
+      eyebrow={source.kind === 'mock' ? 'Body signals · sample data' : 'Body signals'}
       title="Connected">
       {SIGNALS.filter((s) => signals.includes(s.id)).map((signal) => {
         const reading = readings[signal.id];

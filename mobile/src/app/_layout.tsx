@@ -3,9 +3,11 @@ import { useColorScheme } from 'react-native';
 
 import { CalmProvider } from '@/calm/calm-context';
 import { HealthProvider } from '@/health/health-context';
+import { useNudges } from '@/nudges/use-nudges';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  useNudges();
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <HealthProvider>
@@ -21,6 +23,8 @@ export default function RootLayout() {
               name="session/[id]"
               options={{ presentation: 'fullScreenModal', headerShown: false, gestureEnabled: false }}
             />
+            <Stack.Screen name="dev" options={{ presentation: 'modal', title: '' }} />
+            <Stack.Screen name="settings" options={{ presentation: 'modal', title: '' }} />
             <Stack.Screen
               name="support"
               options={{
