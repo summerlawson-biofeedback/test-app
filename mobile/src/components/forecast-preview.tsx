@@ -4,47 +4,47 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSky } from '@/components/sky-background';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing, type Forecast } from '@/constants/theme';
-import { FORECAST_COPY } from '@/forecast/forecast';
+import type { MockNight } from '@/health/mock-source';
 
-const OPTIONS: Forecast[] = ['clear', 'variable', 'stormy'];
+const NIGHTS: { id: MockNight; label: string }[] = [
+  { id: 'rested', label: 'Rested' },
+  { id: 'light', label: 'Light night' },
+  { id: 'short', label: 'Short night' },
+];
 
-/** Sample-data only: lets you flip between skies to preview the design. */
+/** Sample-data only: pick last night to preview how the forecast responds. */
 export function ForecastPreview({
+  forecast,
   value,
   onChange,
 }: {
-  value: Forecast;
-  onChange: (forecast: Forecast) => void;
+  forecast: Forecast;
+  value: MockNight;
+  onChange: (night: MockNight) => void;
 }) {
-  const sky = useSky(value);
+  const sky = useSky(forecast);
 
   return (
     <View style={styles.wrap}>
       <ThemedText type="small" style={{ color: sky.textSecondary }}>
-        Sample data · preview a forecast
+        Sample data · preview last night
       </ThemedText>
       <View style={styles.row} accessibilityRole="radiogroup">
-        {OPTIONS.map((option) => {
-          const selected = option === value;
+        {NIGHTS.map((night) => {
+          const selected = night.id === value;
           return (
             <Pressable
-              key={option}
+              key={night.id}
               accessibilityRole="radio"
               accessibilityState={{ selected }}
-              accessibilityLabel={`Preview ${FORECAST_COPY[option].label} forecast`}
+              accessibilityLabel={`Preview a ${night.label.toLowerCase()}`}
               onPress={() => {
                 Haptics.selectionAsync().catch(() => {});
-                onChange(option);
+                onChange(night.id);
               }}
-              style={[
-                styles.chip,
-                { borderColor: sky.text },
-                selected && { backgroundColor: sky.text },
-              ]}>
-              <ThemedText
-                type="smallBold"
-                style={{ color: selected ? sky.inverse : sky.text }}>
-                {FORECAST_COPY[option].label}
+              style={[styles.chip, { borderColor: sky.text }, selected && { backgroundColor: sky.text }]}>
+              <ThemedText type="smallBold" style={{ color: selected ? sky.inverse : sky.text }}>
+                {night.label}
               </ThemedText>
             </Pressable>
           );

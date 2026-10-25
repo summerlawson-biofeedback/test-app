@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { FORECAST_CONFIG } from '@/forecast/config';
 import type { StressConfig } from '@/stress/config';
 
 export type NudgeFrequency = 'balanced' | 'gentle';
@@ -7,6 +8,8 @@ export type NudgeFrequency = 'balanced' | 'gentle';
 export type NudgeSettings = {
   enabled: boolean;
   frequency: NudgeFrequency;
+  /** Optional daily "inner weather" notification; off unless the person turns it on. */
+  morning: { enabled: boolean; hour: number; minute: number };
 };
 
 export const FREQUENCIES: Record<
@@ -25,7 +28,11 @@ export const FREQUENCIES: Record<
   },
 };
 
-export const DEFAULT_NUDGE_SETTINGS: NudgeSettings = { enabled: true, frequency: 'balanced' };
+export const DEFAULT_NUDGE_SETTINGS: NudgeSettings = {
+  enabled: true,
+  frequency: 'balanced',
+  morning: { enabled: false, hour: FORECAST_CONFIG.defaultHour, minute: FORECAST_CONFIG.defaultMinute },
+};
 
 const KEY = 'pulsepause.nudge-settings.v1';
 

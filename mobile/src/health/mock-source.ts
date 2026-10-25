@@ -1,8 +1,11 @@
 import type { SignalId } from '@/health/signals';
-import type { HealthDataSource, Readings, Sample } from '@/health/source';
+import type { HealthDataSource, Readings, Sample, SleepNight } from '@/health/source';
 
 /** What the mock body is doing right now. The developer screen switches between these. */
 export type MockScenario = 'calm' | 'stress' | 'workout' | 'after-workout';
+
+/** Last night, for previewing the morning forecast. */
+export type MockNight = 'rested' | 'light' | 'short';
 
 const SAMPLE_READINGS: Readings = {
   heartRate: { value: '72', unit: 'bpm', when: '2 min ago' },
@@ -14,8 +17,14 @@ const SAMPLE_READINGS: Readings = {
   bloodPressure: { value: '118/76', unit: 'mmHg', when: 'yesterday' },
 };
 
-// Two weeks of believable resting heart rate (median 58).
-const RESTING = [57, 59, 58, 60, 56, 58, 59, 57, 58, 61, 58, 57, 59, 58];
+// Two weeks of believable resting heart rate (median 58); today's value depends on the night.
+const RESTING = [57, 59, 58, 60, 56, 58, 59, 57, 58, 61, 58, 57, 59];
+
+const NIGHTS: Record<MockNight, { asleepMinutes: number; restingToday: number; wokeAt: [number, number] }> = {
+  rested: { asleepMinutes: 7 * 60 + 40, restingToday: 57, wokeAt: [6, 50] },
+  light: { asleepMinutes: 6 * 60 + 25, restingToday: 61, wokeAt: [6, 20] },
+  short: { asleepMinutes: 5 * 60 + 10, restingToday: 66, wokeAt: [5, 40] },
+};
 
 const MINUTE = 60_000;
 
@@ -35,6 +44,7 @@ const wobble = (minute: number, size: number) => Math.round(Math.sin(minute * 1.
 export class MockHealthDataSource implements HealthDataSource {
   readonly kind = 'mock' as const;
   scenario: MockScenario = 'calm';
+  night: MockNight = 'rested';
 
   async requestAccess() {}
 
@@ -46,7 +56,14 @@ export class MockHealthDataSource implements HealthDataSource {
 
   // The mock's two weeks always end today, so `now` isn't needed.
   async getDailyRestingHeartRate(days: number, _now?: Date) {
-    return RESTING.slice(-days);
+    return [...RESTING, NIGHTS[this.night].restingToday].slice(-days);
+  }
+
+  async getLastNightSleep(now: Date): Promise<SleepNight> {
+    const { asleepMinutes, wokeAt } = NIGHTS[this.night];
+    const woke = new Date(now);
+    woke.setHours(wokeAt[0], wokeAt[1], 0, 0);
+    return { asleepMinutes, wokeAt: woke };
   }
 
   async getHeartRate(from: Date, to: Date) {

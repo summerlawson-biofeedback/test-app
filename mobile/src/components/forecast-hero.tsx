@@ -7,9 +7,11 @@ import { Spacing } from '@/constants/theme';
 import { FORECAST_COPY, type TodaySummary } from '@/forecast/forecast';
 
 /** Today's focal element: the forecast and recovery time, sitting directly on the sky. */
-export function ForecastHero({ day }: { day: TodaySummary }) {
+export function ForecastHero({ day, line }: { day: TodaySummary; line?: string }) {
   const sky = useSky(day.forecast);
   const copy = FORECAST_COPY[day.forecast];
+  // The morning forecast's suggestion when there is one, otherwise the general line.
+  const subline = line ?? copy.line;
   const { recoveryMinutes: today, averageRecoveryMinutes: average } = day;
 
   // Reinforcement only: compare with the average when today was quicker, never when slower.
@@ -21,7 +23,7 @@ export function ForecastHero({ day }: { day: TodaySummary }) {
         : `Quickest recovery today · every reset counts`;
 
   const spoken =
-    `Forecast: ${copy.label}. ${copy.line} ` +
+    `Forecast: ${copy.label}. ${subline} ` +
     (today === null ? recoveryLine : `Quickest recovery today: ${today} minutes. `) +
     (today !== null && today <= average ? `Your average last month was ${average} minutes.` : '');
 
@@ -33,7 +35,7 @@ export function ForecastHero({ day }: { day: TodaySummary }) {
           {copy.label}
         </ThemedText>
       </View>
-      <ThemedText style={{ color: sky.textSecondary }}>{copy.line}</ThemedText>
+      <ThemedText style={{ color: sky.textSecondary }}>{subline}</ThemedText>
 
       <View style={styles.metric}>
         <ThemedText type="display" maxFontSizeMultiplier={1.6} style={{ color: sky.text }}>

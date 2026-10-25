@@ -12,6 +12,8 @@ export type Readings = Partial<Record<SignalId, Reading>>;
 /** One timestamped value: bpm for heart rate, step count for that minute for steps. */
 export type Sample = { at: Date; value: number };
 
+export type SleepNight = { asleepMinutes: number; wokeAt: Date };
+
 /**
  * Where health data comes from. The mock works in Expo Go today; an Apple Health source
  * (HealthKit, which needs a development build) will implement the same shape.
@@ -28,5 +30,7 @@ export interface HealthDataSource {
   /** One resting heart rate per day for the last `days` days, oldest first. */
   getDailyRestingHeartRate(days: number, now: Date): Promise<number[]>;
   getHeartRate(from: Date, to: Date): Promise<Sample[]>;
+  /** The most recent night's sleep, or null if there isn't one. */
+  getLastNightSleep(now: Date): Promise<SleepNight | null>;
   getSteps(from: Date, to: Date): Promise<Sample[]>;
 }

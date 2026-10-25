@@ -7,11 +7,15 @@ import { BodySignalsCard } from '@/components/body-signals-card';
 import { Card } from '@/components/card';
 import { ForecastHero } from '@/components/forecast-hero';
 import { ForecastPreview } from '@/components/forecast-preview';
+import { MorningLayersCard } from '@/components/morning-layers-card';
 import { Screen } from '@/components/screen';
 import { SkyBackground, useSky } from '@/components/sky-background';
 import { ThemedText } from '@/components/themed-text';
 import { WinsCard } from '@/components/wins-card';
-import { SAMPLE_DAYS, type Forecast } from '@/forecast/forecast';
+import { SAMPLE_DAYS } from '@/forecast/forecast';
+import { useMorningForecast } from '@/forecast/use-morning-forecast';
+import { useHealth } from '@/health/health-context';
+import { mockHealthDataSource, type MockNight } from '@/health/mock-source';
 
 const today = new Date().toLocaleDateString(undefined, {
   weekday: 'long',
@@ -19,9 +23,13 @@ const today = new Date().toLocaleDateString(undefined, {
   day: 'numeric',
 });
 
-// Sample days for now. The forecast, recovery time and wins will come from real data later.
+// The forecast comes from last night's sleep and resting heart (mock data for now).
+// Recovery time and wins are still sample values until resets feed them.
 export default function TodayScreen() {
-  const [forecast, setForecast] = useState<Forecast>('clear');
+  const { source } = useHealth();
+  const [night, setNight] = useState<MockNight>(mockHealthDataSource.night);
+  const morning = useMorningForecast(night);
+  const forecast = morning.forecast?.forecast ?? 'variable';
   const day = SAMPLE_DAYS[forecast];
   const sky = useSky(forecast);
 
@@ -44,8 +52,19 @@ export default function TodayScreen() {
           <SymbolView name="gearshape" tintColor={sky.text} size={24} />
         </Pressable>
       }>
-      <ForecastHero day={day} />
-      <ForecastPreview value={forecast} onChange={setForecast} />
+      <ForecastHero day={day} line={morning.forecast?.suggestion} />
+      {source.kind === 'mock' ? (
+        <ForecastPreview
+          forecast={forecast}
+          value={night}
+          onChange={(next) => {
+            mockHealthDataSource.night = next;
+            setNight(next);
+          }}
+        />
+      ) : null}
+
+      <MorningLayersCard eyebrow="This morning" summary={morning} />
 
       <WinsCard eyebrow="Clearing sky" wins={day.wins} />
 

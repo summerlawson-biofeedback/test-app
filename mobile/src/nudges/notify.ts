@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 
 import { CONTEXT_OPTIONS, recordContext, type ContextAnswer } from '@/nudges/context';
 import { loadNudges, logNudgeOutcome, logNudgeSent } from '@/nudges/nudge-log';
+import type { NudgeSettings } from '@/nudges/settings';
 
 export const NUDGE_TEXT = "Your body's running a little hot. Want a 60-second reset?";
 const CATEGORY = 'stress-nudge';
@@ -9,6 +10,7 @@ const OPENS = '/calm';
 /** iOS reports a swipe-away with this action when the category asks for it. */
 const IOS_DISMISS_ACTION = 'com.apple.UNNotificationDismissActionIdentifier';
 const CONTEXT_ACTION = 'context:';
+const MORNING = 'morning-forecast';
 /** Still sitting in Notification Center this long after sending counts as ignored. */
 const IGNORED_AFTER_MS = 2 * 60 * 60_000;
 
@@ -63,10 +65,33 @@ export async function sendStressNudge() {
 }
 
 /**
- * Handles someone acting on a nudge. Returns the screen to open, or null.
+ * Keeps the daily morning notification in step with Settings. Its text can't hold the
+ * forecast itself (it's scheduled ahead of time), so it invites a look and Today does the rest.
+ */
+export async function scheduleMorningForecast({ morning }: NudgeSettings) {
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  await Promise.all(
+    scheduled
+      .filter((n) => n.content.data?.kind === MORNING)
+      .map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier))
+  );
+  if (!morning.enabled) return;
+  await Notifications.scheduleNotificationAsync({
+    content: { body: 'Your inner weather for today is ready.', data: { kind: MORNING, url: '/' } },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour: morning.hour,
+      minute: morning.minute,
+    },
+  });
+}
+
+/**
+ * Handles someone acting on a nudge or the morning forecast. Returns the screen to open, or null.
  */
 export async function handleNudgeResponse(response: Notifications.NotificationResponse) {
   const { identifier, content } = response.notification.request;
+  if (content.data?.kind === MORNING) return '/';
   if (content.data?.kind !== CATEGORY) return null;
 
   if (response.actionIdentifier === IOS_DISMISS_ACTION) {

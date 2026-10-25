@@ -1,5 +1,6 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Switch, View } from 'react-native';
+import { Linking, Platform, Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { Card } from '@/components/card';
 import { PillButton } from '@/components/pill-button';
@@ -7,7 +8,12 @@ import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { askForNotifications, NUDGE_TEXT, notificationsAllowed } from '@/nudges/notify';
+import {
+  askForNotifications,
+  NUDGE_TEXT,
+  notificationsAllowed,
+  scheduleMorningForecast,
+} from '@/nudges/notify';
 import {
   DEFAULT_NUDGE_SETTINGS,
   FREQUENCIES,
@@ -39,7 +45,16 @@ export default function SettingsScreen() {
   const update = (next: NudgeSettings) => {
     setSettings(next);
     saveNudgeSettings(next);
+    if (Platform.OS !== 'web') scheduleMorningForecast(next).catch(() => {});
   };
+
+  const setMorning = async (morning: Partial<NudgeSettings['morning']>) => {
+    const next = { ...settings, morning: { ...settings.morning, ...morning } };
+    update(next);
+    if (morning.enabled) setAllowed(await askForNotifications().catch(() => false));
+  };
+
+  const morningTime = new Date(2000, 0, 1, settings.morning.hour, settings.morning.minute);
 
   const toggle = async (enabled: boolean) => {
     update({ ...settings, enabled });
@@ -104,6 +119,36 @@ export default function SettingsScreen() {
           </ThemedText>
         </Card>
       ) : null}
+
+      <Card eyebrow="Morning forecast" title="Your inner weather, each morning">
+        <ThemedText themeColor="textSecondary">
+          An optional notification when your forecast is ready, built from last night&apos;s sleep and
+          your resting heart rate.
+        </ThemedText>
+        <View style={styles.row}>
+          <ThemedText type="smallBold" style={styles.flex}>
+            Morning notification
+          </ThemedText>
+          <Switch
+            accessibilityLabel="Morning forecast notification"
+            value={settings.morning.enabled}
+            onValueChange={(enabled) => setMorning({ enabled })}
+            trackColor={{ true: theme.accent }}
+          />
+        </View>
+        {settings.morning.enabled && Platform.OS !== 'web' ? (
+          <View style={styles.row}>
+            <ThemedText style={styles.flex}>Time</ThemedText>
+            <DateTimePicker
+              accessibilityLabel="Morning notification time"
+              mode="time"
+              display="compact"
+              value={morningTime}
+              onChange={(_, date) => date && setMorning({ hour: date.getHours(), minute: date.getMinutes() })}
+            />
+          </View>
+        ) : null}
+      </Card>
 
       {patterns.length > 0 ? (
         <Card eyebrow="Your patterns" title="From your check-ins">
