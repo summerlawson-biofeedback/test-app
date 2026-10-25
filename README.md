@@ -1,3 +1,11 @@
+# PulsePause
+
+- **Website** (Vite + React): repo root. `npm run dev`
+- **iPhone app** (Expo / React Native): [`mobile/`](mobile/). See [mobile/README.md](mobile/README.md)
+- **Backend** (Amplify Gen 2): [`amplify/`](amplify/), shared by both
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
