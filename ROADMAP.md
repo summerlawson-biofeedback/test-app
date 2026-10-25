@@ -2,6 +2,31 @@
 
 Build queue, in order. Product rules live in `CLAUDE.md`.
 
+## Last session (October 25, 2026)
+
+**Completed:** Calm screen, stress detector + developer screen, stress nudges with settings,
+context check-in, morning inner-weather forecast, `CLAUDE.md` product rules, and this roadmap.
+All on the `mobile-app` branch (not merged into `main`). 50 tests passing.
+
+**Next:** item 2, the somatic menu (Hum, Orient, Press and Feel, ordered by context and by each
+person's ratings), then the three open `CLAUDE.md` safety and privacy items below.
+
+**For you to do before next session:**
+- Test on your iPhone in Expo Go: Calm resets, the morning forecast, and a simulated nudge
+  (long-press "Today", then Run detector). Check whether the check-in buttons on the
+  notification itself save an answer.
+- Check the AWS Amplify console: the latest `main` deploy succeeded and the old `Todo` table
+  is gone.
+- Watch for the Apple Developer approval email. Once approved, request the Family Controls
+  entitlement (see "Waiting on Apple").
+- Decide: does the Stressor Shield fit the "not a social-feed blocker" positioning?
+- Decide for the outcomes log (item 8): on-device only, or synced to AWS? And who reviews
+  the voluntary-participation wording?
+- News windows (6) and the weekly report (7): reminders when you open a news app, and
+  news-timing patterns like "opened news before 8 a.m.", need Screen Time access. Until then,
+  they can use scheduled reminders and in-app data only. Decide whether that's enough to
+  start with.
+
 - [x] **1. Calm screen**: 60-second breathing and grounding resets with 1–5 activation ratings before and after.
 - [ ] **2. Somatic menu**: Hum, Physiological Sigh, Orient, and Press and Feel, ordered by context and what works best for each person. *(Physiological sigh is built; Hum, Orient and Press and Feel are not.)*
 - [x] **3. Stress detector with mock data + simulate button**: personal 14-day baseline, still-vs-moving check, cooldown and quiet hours; hidden developer screen to simulate.
